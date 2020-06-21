@@ -12,7 +12,9 @@
 #import "UIControl+MLCKit.h"
 #import "LCAudioPlayer.h"
 
-@interface ViewController ()
+@interface ViewController ()<LCAudioPlayerDelegate>
+
+@property (nonatomic, strong) LCAudioPlayer *audioPlayer;//
 
 @end
 
@@ -22,6 +24,14 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
 }
+#pragma mark -
+- (void)useAudioPlayer {
+    self.audioPlayer = [[LCAudioPlayer alloc]init];
+    self.audioPlayer.url = [NSURL URLWithString:@""];
+    self.audioPlayer.delegate = self;
+    [self.audioPlayer play];
+}
+#pragma mark -LCAudioPlayerDelegate
 
 
 @end
