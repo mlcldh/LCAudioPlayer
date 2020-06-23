@@ -1,0 +1,36 @@
+PODS:
+  - LCAudioPlayer (0.0.1)
+  - Masonry (1.1.0)
+  - MLCKit/Category (0.0.2)
+  - MLCKit/Macro (0.0.2)
+
+DEPENDENCIES:
+  - LCAudioPlayer (from `../`)
+  - Masonry (= 1.1.0)
+  - MLCKit/Category (from `https://github.com/mlcldh/MLCKit.git`, commit `2eb6587`)
+  - MLCKit/Macro (from `https://github.com/mlcldh/MLCKit.git`, commit `2eb6587`)
+
+SPEC REPOS:
+  https://github.com/CocoaPods/Specs.git:
+    - Masonry
+
+EXTERNAL SOURCES:
+  LCAudioPlayer:
+    :path: "../"
+  MLCKit:
+    :commit: 2eb6587
+    :git: https://github.com/mlcldh/MLCKit.git
+
+CHECKOUT OPTIONS:
+  MLCKit:
+    :commit: 2eb6587
+    :git: https://github.com/mlcldh/MLCKit.git
+
+SPEC CHECKSUMS:
+  LCAudioPlayer: 6e2bb2faa5fc0df712ff9c07a4cf984b67dd5d9f
+  Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
+  MLCKit: c5f39521a35f363ebbf97c9192183f1e8597a7a4
+
+PODFILE CHECKSUM: fbe129a6571f3cd2f0b5bd1339150f90c3855d3d
+
+COCOAPODS: 1.8.4
