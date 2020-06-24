@@ -6,11 +6,11 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <CoreMedia/CoreMedia.h>
 
 typedef NS_ENUM(NSInteger, LCAudioPlayerState) {
     LCAudioPlayerStateReady = 0,//
     LCAudioPlayerStateLoading = 1,//
-    LCAudioPlayerStateLoadedMetadata = 1,//
     LCAudioPlayerStatePlaying = 2,//
     LCAudioPlayerStatePaused = 3,//
     LCAudioPlayerStateStopped = 4,//
@@ -28,6 +28,8 @@ typedef NS_ENUM(NSInteger, LCAudioPlayerState) {
 - (void)audioPlayerDidStart:(LCAudioPlayer *)audioPlayer;
 /***/
 - (void)audioPlayerLoadedMetadata:(LCAudioPlayer *)audioPlayer;
+/***/
+- (void)audioPlayerCanPlay:(LCAudioPlayer *)audioPlayer;
 /***/
 - (void)audioPlayerSeeking:(LCAudioPlayer *)audioPlayer;
 /***/
@@ -53,10 +55,17 @@ typedef NS_ENUM(NSInteger, LCAudioPlayerState) {
 /***/
 @property (nonatomic) double startPlayTime;
 /***/
+@property (nonatomic) double volume;
+/***/
+@property (nonatomic, readonly) double currentTime;
+/***/
+@property (nonatomic, readonly) double duration;
+/***/
+@property (nonatomic, readonly) BOOL loadedMetadata;
+/***/
 @property (nonatomic, readonly) LCAudioPlayerState state;
 /***/
 @property (nonatomic, weak) id<LCAudioPlayerDelegate> delegate;
-
 
 /***/
 - (void)play;
@@ -64,6 +73,8 @@ typedef NS_ENUM(NSInteger, LCAudioPlayerState) {
 - (void)pause;
 /***/
 - (void)stop;
+/***/
+- (void)seekToTime:(CMTime)time completionHandler:(void (^)(BOOL finished))completionHandler;
 
 @end
 

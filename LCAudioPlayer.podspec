@@ -19,7 +19,7 @@ Pod::Spec.new do |s|
   # s.source_files = 'LCAudioPlayer/LCAudioPlayer.h'
   s.source_files = 'LCAudioPlayer/**/*'
 
-  s.frameworks = 'AVFoundation', 'Foundation'
+  s.frameworks = 'AVFoundation', 'CoreMedia'
 
   s.requires_arc = true
   s.static_framework = true

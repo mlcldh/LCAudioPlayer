@@ -10,6 +10,7 @@
 
 @interface LCAudioPlayer ()
 
+@property (nonatomic, copy) NSURL *playUrl;//
 @property (nonatomic, strong) AVPlayer *innerPlayer;//
 @property (nonatomic, strong) NSObject *periodicTimeObserver;//
 
@@ -39,15 +40,22 @@
         //        NSLog(@"menglc AVPlayerItem status%@,%@",@(playerItem.status),playerItem.error);
         switch (playerItem.status) {
             case AVPlayerItemStatusReadyToPlay: {
-                _state = LCAudioPlayerStateLoadedMetadata;
-                if ([self.delegate respondsToSelector:@selector(audioPlayerLoadedMetadata:)]) {
-                    [self.delegate audioPlayerLoadedMetadata:self];
+                BOOL shouldSeek = NO;
+                if (!self.loadedMetadata) {
+                    _loadedMetadata = YES;
+                    if ([self.delegate respondsToSelector:@selector(audioPlayerLoadedMetadata:)]) {
+                        [self.delegate audioPlayerLoadedMetadata:self];
+                    }
+                    shouldSeek = YES;
                 }
-                if (self.startPlayTime > 0) {
+                if (_loadedMetadata) {
+                    if ([self.delegate respondsToSelector:@selector(audioPlayerCanPlay:)]) {
+                        [self.delegate audioPlayerCanPlay:self];
+                    }
+                }
+                if (shouldSeek && (self.startPlayTime > 0)) {
                     [self seekToTime:CMTimeMake(self.startPlayTime, 1) completionHandler:^(BOOL finished) {
-                        
                     }];
-                    self.startPlayTime = 0;
                 }
             }
                 break;
@@ -78,17 +86,29 @@
 }
 #pragma mark - Setter
 - (void)setUrl:(NSURL *)url {
-    if (_url.absoluteString.length) {
+    if (self.playUrl) {
         [self stop];
-        [self removeObserverOfPlayer:self.innerPlayer];
     }
-    AVPlayerItem *playerItem =[AVPlayerItem playerItemWithURL:url];
-    [self.innerPlayer replaceCurrentItemWithPlayerItem:playerItem];
-    [self addObserverOfPlayer:self.innerPlayer];
+    _url = url.copy;
+    _duration = 0;
+}
+- (double)volume {
+    return self.innerPlayer.volume;
+}
+- (void)setVolume:(double)volume {
+    self.innerPlayer.volume = volume;
 }
 #pragma mark -
 - (void)play {
-    [self.innerPlayer play];
+    if (self.url && ![self.url isEqual:self.playUrl]) {
+        AVPlayerItem *playerItem = [AVPlayerItem playerItemWithURL:self.url];
+        [self.innerPlayer replaceCurrentItemWithPlayerItem:playerItem];
+        [self addObserverOfPlayer:self.innerPlayer];
+        self.playUrl = self.url;
+    }
+    if (self.url) {
+        [self.innerPlayer play];
+    }
 }
 - (void)pause {
     [self.innerPlayer pause];
@@ -103,6 +123,12 @@
     if ([self.delegate respondsToSelector:@selector(audioPlayerDidStopped:)]) {
         [self.delegate audioPlayerDidStopped:self];
     }
+    [self removeObserverOfPlayer:self.innerPlayer];
+    [self.innerPlayer replaceCurrentItemWithPlayerItem:nil];
+//    [self addObserverOfPlayer:self.innerPlayer];
+    _loadedMetadata = NO;
+    _startPlayTime = 0;
+    self.playUrl = nil;
 }
 - (void)seekToTime:(CMTime)time completionHandler:(void (^)(BOOL finished))completionHandler {
     if (self.innerPlayer.status != AVPlayerItemStatusReadyToPlay) {//保护下
@@ -149,6 +175,8 @@
     _state = LCAudioPlayerStatePlaying;
     double currentTime = CMTimeGetSeconds(time);
     double duration = CMTimeGetSeconds([player.currentItem duration]);
+    _currentTime = currentTime;
+    _duration = duration;
     if ([self.delegate respondsToSelector:@selector(audioPlayer:updateCurrentTime:duration:)]) {
         [self.delegate audioPlayer:self updateCurrentTime:currentTime duration:duration];
     }
