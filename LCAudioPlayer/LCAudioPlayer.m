@@ -26,6 +26,7 @@
     self = [super init];
     if (self) {
         self.innerPlayer = [[AVPlayer alloc]init];
+        self.rate = 1;
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleAVAudioSessionInterruptionNotification:) name:AVAudioSessionInterruptionNotification object:[AVAudioSession sharedInstance]];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleAVAudioSessionRouteChangeNotification:) name:AVAudioSessionRouteChangeNotification object:[AVAudioSession sharedInstance]];
     }
@@ -43,8 +44,8 @@
                 BOOL shouldSeek = NO;
                 if (!self.loadedMetadata) {
                     _loadedMetadata = YES;
-                    if ([self.delegate respondsToSelector:@selector(audioPlayerLoadedMetadata:)]) {
-                        [self.delegate audioPlayerLoadedMetadata:self];
+                    if ([self.delegate respondsToSelector:@selector(audioPlayerDidStart:)]) {
+                        [self.delegate audioPlayerDidStart:self];
                     }
                     shouldSeek = YES;
                 }
@@ -60,6 +61,9 @@
             }
                 break;
             case AVPlayerItemStatusFailed: {
+                if ([self.delegate respondsToSelector:@selector(audioPlayer:playError:)]) {
+                    [self.delegate audioPlayer:self playError:self.innerPlayer.error];
+                }
                 [self removeObserverOfPlayer:self.innerPlayer];
                 [self.innerPlayer pause];
                 
@@ -95,6 +99,12 @@
 - (double)volume {
     return self.innerPlayer.volume;
 }
+- (void)setRate:(double)rate {
+    if (rate <= 0) {
+        return;
+    }
+    _rate = rate;
+}
 - (void)setVolume:(double)volume {
     self.innerPlayer.volume = volume;
 }
@@ -107,7 +117,11 @@
         self.playUrl = self.url;
     }
     if (self.url) {
-        [self.innerPlayer play];
+        self.innerPlayer.rate = self.rate;
+        _state = LCAudioPlayerStateLoading;
+        if ([self.delegate respondsToSelector:@selector(audioPlayerLoading:)]) {
+            [self.delegate audioPlayerLoading:self];
+        }
     }
 }
 - (void)pause {
@@ -134,16 +148,16 @@
     if (self.innerPlayer.status != AVPlayerItemStatusReadyToPlay) {//保护下
         return;
     }
-    if ([self.delegate respondsToSelector:@selector(audioPlayerSeeking:)]) {
-        [self.delegate audioPlayerSeeking:self];
+    if ([self.delegate respondsToSelector:@selector(audioPlayer:seekingWithSeekTime:)]) {
+        [self.delegate audioPlayer:self seekingWithSeekTime:CMTimeGetSeconds(time)];
     }
     __weak __typeof(self) weakSelf = self;
     [self.innerPlayer seekToTime:time completionHandler:^(BOOL finished) {
         if (completionHandler) {
             completionHandler(finished);
         }
-        if ([weakSelf.delegate respondsToSelector:@selector(audioPlayerSeeked:finished:)]) {
-            [weakSelf.delegate audioPlayerSeeked:self finished:finished];
+        if ([weakSelf.delegate respondsToSelector:@selector(audioPlayer:seekedWithSeekTime:finished:)]) {
+            [weakSelf.delegate audioPlayer:self seekedWithSeekTime:CMTimeGetSeconds(time) finished:finished];
         }
     }];
 }
@@ -172,7 +186,10 @@
 - (void)handleCurrentTime:(CMTime)time ofPlayer:(AVPlayer *)player{
     //    NSLog(@"menglc self.fmPlayer.rate = %@",@(self.fmPlayer.rate));
     //    NSLog(@"menglc AVAudioSession category 2 = %@",[AVAudioSession sharedInstance].category);
-    _state = LCAudioPlayerStatePlaying;
+    if (_state != LCAudioPlayerStatePaused) {
+        _state = LCAudioPlayerStatePlaying;
+    }
+    
     double currentTime = CMTimeGetSeconds(time);
     double duration = CMTimeGetSeconds([player.currentItem duration]);
     _currentTime = currentTime;
@@ -194,15 +211,33 @@
 #pragma mark - AVAudioSessionInterruptionNotification
 - (void)handleAVAudioSessionInterruptionNotification:(NSNotification *)notification {
     NSDictionary *info = notification.userInfo;
-//    NSLog(@"InterruptionNotification info = %@",info);
-    AVAudioSessionInterruptionType type = [info[AVAudioSessionInterruptionTypeKey] unsignedIntegerValue];
-    
+//    NSLog(@"menglc AVAudioSessionInterruptionNotification %@",info);
+    AVAudioSessionInterruptionType interruptionType = [info[AVAudioSessionInterruptionTypeKey] unsignedIntegerValue];
+    BOOL isPlaying = (self.state == LCAudioPlayerStatePlaying) || (self.state == LCAudioPlayerStateLoading);
+    if (interruptionType == AVAudioSessionInterruptionTypeBegan && isPlaying) {
+        [self pause];
+    } else if (interruptionType == AVAudioSessionInterruptionTypeEnded) {
+        NSError *error = nil;
+        if([[AVAudioSession sharedInstance] setActive:YES error:&error]){
+            [self play];
+        }
+    }
 }
 #pragma mark - AVAudioSessionRouteChangeNotification
 - (void)handleAVAudioSessionRouteChangeNotification:(NSNotification *)notification {
+    BOOL isPlaying = (self.state == LCAudioPlayerStatePlaying) || (self.state == LCAudioPlayerStateLoading);
     NSDictionary *info = notification.userInfo;
-//    NSLog(@"RouteChangeNotification info = %@",info);
+//    NSLog(@"menglc AVAudioSessionRouteChangeNotification %@",info);
     AVAudioSessionRouteChangeReason reason = [info[AVAudioSessionRouteChangeReasonKey] unsignedIntegerValue];
+    if ((reason == AVAudioSessionRouteChangeReasonOldDeviceUnavailable) && isPlaying) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self pause];
+        });
+    } else if ((reason == AVAudioSessionRouteChangeReasonNewDeviceAvailable) && isPlaying) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self play];
+        });
+    }
 }
 
 @end

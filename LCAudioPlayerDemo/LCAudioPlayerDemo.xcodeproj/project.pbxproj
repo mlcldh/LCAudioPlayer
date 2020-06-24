@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		3E1E65A5C6337AAF79A610B0 /* libPods-LCAudioPlayerDemo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 92D260942FA72E76CBB826CB /* libPods-LCAudioPlayerDemo.a */; };
+		8D141EE824A3694C001AFFB1 /* PlayStatusButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D141EE724A3694C001AFFB1 /* PlayStatusButton.m */; };
 		8DF67CA6249F359400637C04 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 8DF67CA5249F359400637C04 /* AppDelegate.m */; };
 		8DF67CAC249F359400637C04 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8DF67CAB249F359400637C04 /* ViewController.m */; };
 		8DF67CB1249F359600637C04 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8DF67CB0249F359600637C04 /* Assets.xcassets */; };
@@ -18,6 +19,8 @@
 /* Begin PBXFileReference section */
 		3AC482481BACBBCBFAE16203 /* Pods-LCAudioPlayerDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LCAudioPlayerDemo.debug.xcconfig"; path = "Target Support Files/Pods-LCAudioPlayerDemo/Pods-LCAudioPlayerDemo.debug.xcconfig"; sourceTree = "<group>"; };
 		69D1D04F6429AD5818241078 /* Pods-LCAudioPlayerDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LCAudioPlayerDemo.release.xcconfig"; path = "Target Support Files/Pods-LCAudioPlayerDemo/Pods-LCAudioPlayerDemo.release.xcconfig"; sourceTree = "<group>"; };
+		8D141EE624A3694C001AFFB1 /* PlayStatusButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PlayStatusButton.h; sourceTree = "<group>"; };
+		8D141EE724A3694C001AFFB1 /* PlayStatusButton.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PlayStatusButton.m; sourceTree = "<group>"; };
 		8DF67CA1249F359400637C04 /* LCAudioPlayerDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LCAudioPlayerDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8DF67CA4249F359400637C04 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		8DF67CA5249F359400637C04 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -84,6 +87,8 @@
 				8DF67CA5249F359400637C04 /* AppDelegate.m */,
 				8DF67CAA249F359400637C04 /* ViewController.h */,
 				8DF67CAB249F359400637C04 /* ViewController.m */,
+				8D141EE624A3694C001AFFB1 /* PlayStatusButton.h */,
+				8D141EE724A3694C001AFFB1 /* PlayStatusButton.m */,
 				8DF67CB0249F359600637C04 /* Assets.xcassets */,
 				8DF67CB2249F359600637C04 /* LaunchScreen.storyboard */,
 				8DF67CB5249F359700637C04 /* Info.plist */,
@@ -187,6 +192,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8D141EE824A3694C001AFFB1 /* PlayStatusButton.m in Sources */,
 				8DF67CAC249F359400637C04 /* ViewController.m in Sources */,
 				8DF67CA6249F359400637C04 /* AppDelegate.m in Sources */,
 				8DF67CB7249F359700637C04 /* main.m in Sources */,

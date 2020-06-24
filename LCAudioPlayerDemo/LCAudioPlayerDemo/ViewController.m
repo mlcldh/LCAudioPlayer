@@ -11,6 +11,7 @@
 #import "MLCMacror.h"
 #import "UIControl+MLCKit.h"
 #import "LCAudioPlayer.h"
+#import "PlayStatusButton.h"
 
 @interface ViewController ()<LCAudioPlayerDelegate>
 
@@ -19,9 +20,11 @@
 @property (nonatomic, strong) UIButton *setStartPlayTimeButton;//
 @property (nonatomic, strong) UIButton *pauseButton;//
 @property (nonatomic, strong) UIButton *stopButton;//
-@property (nonatomic, strong) UIButton *resumeButton;//
+@property (nonatomic, strong) UIButton *rateButton;//
 @property (nonatomic, strong) UIButton *playNextButton;//
 @property (nonatomic, strong) UIButton *seekButton;//
+@property (nonatomic, strong) PlayStatusButton *playStatusButton;//
+
 @property (nonatomic, strong) UISlider *cacheSlider;//
 @property (nonatomic, strong) UISlider *progressSlider;//
 @property (nonatomic, strong) UISlider *volumeSlider;//
@@ -45,14 +48,17 @@
                     @"http://aod.cos.tx.xmcdn.com/group67/M08/3B/91/wKgMd13Kj3qy-ZDnAEWKES4uq0U690.m4a",];
     
     [self creatAudioPlayer];
+    [self useVolume];
     
     [self playButton];
     [self setStartPlayTimeButton];
     [self pauseButton];
     [self stopButton];
-    [self resumeButton];
+    [self rateButton];
     [self playNextButton];
     [self seekButton];
+    
+    [self playStatusButton];
     
     [self cacheSlider];
     [self progressSlider];
@@ -67,8 +73,6 @@
         @weakify(self)
         [_playButton mlc_addActionForControlEvents:(UIControlEventTouchUpInside) callback:^(id sender) {
             @strongify(self)
-            NSURL *url = [NSURL URLWithString:self.urlStrings.firstObject];
-//            self.audioPlayer.url = url;
             [self.audioPlayer play];
         }];
         [self.view addSubview:_playButton];
@@ -136,22 +140,23 @@
     }
     return _stopButton;
 }
-- (UIButton *)resumeButton {
-    if (!_resumeButton) {
-        _resumeButton = [UIButton buttonWithType:(UIButtonTypeSystem)];
-        _resumeButton.backgroundColor = [UIColor purpleColor];
-        [_resumeButton setTitle:@"resume" forState:(UIControlStateNormal)];
+- (UIButton *)rateButton {
+    if (!_rateButton) {
+        _rateButton = [UIButton buttonWithType:(UIButtonTypeSystem)];
+        _rateButton.backgroundColor = [UIColor purpleColor];
+        [_rateButton setTitle:@"倍速" forState:(UIControlStateNormal)];
         @weakify(self)
-        [_resumeButton mlc_addActionForControlEvents:(UIControlEventTouchUpInside) callback:^(id sender) {
+        [_rateButton mlc_addActionForControlEvents:(UIControlEventTouchUpInside) callback:^(id sender) {
             @strongify(self)
+            self.audioPlayer.rate = 2;
         }];
-        [self.view addSubview:_resumeButton];
-        [_resumeButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        [self.view addSubview:_rateButton];
+        [_rateButton mas_makeConstraints:^(MASConstraintMaker *make) {
             make.left.equalTo(self.stopButton.mas_right).offset(20);
             make.top.equalTo(self.stopButton);
         }];
     }
-    return _resumeButton;
+    return _rateButton;
 }
 - (UIButton *)playNextButton {
     if (!_playNextButton) {
@@ -200,6 +205,42 @@
     }
     return _seekButton;
 }
+- (PlayStatusButton *)playStatusButton {
+    if (!_playStatusButton) {
+        CGFloat width = 64;
+        _playStatusButton = [[PlayStatusButton alloc]init];
+        _playStatusButton.clipsToBounds = YES;
+        _playStatusButton.layer.cornerRadius = width / 2;
+        _playStatusButton.backgroundColor = [UIColor colorWithRed:0 green:132 / 255.0 blue:1 alpha:1];
+        @weakify(self)
+        [_playStatusButton mlc_addActionForControlEvents:(UIControlEventTouchUpInside) callback:^(id sender) {
+            @strongify(self)
+            PlayStatusButton *playStatusButton = sender;
+            switch (playStatusButton.playState) {
+                case PlayStatusButtonStateLoading:
+                    break;
+                case PlayStatusButtonStatePlaying: {
+                    [self.audioPlayer pause];
+                }
+                    break;
+                case PlayStatusButtonStatePaused: {
+                    self.playStatusButton.playState = PlayStatusButtonStatePlaying;
+                    [self.audioPlayer play];
+                }
+                    break;
+                default:
+                    break;
+            }
+        }];
+        [self.view addSubview:_playStatusButton];
+        [_playStatusButton mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.centerX.equalTo(self.view);
+            make.top.equalTo(self.playNextButton.mas_bottom).offset(20);
+            make.width.height.mas_equalTo(width);
+        }];
+    }
+    return _playStatusButton;
+}
 - (UISlider *)cacheSlider {
     if (!_cacheSlider) {
         UILabel *label = [[UILabel alloc]init];
@@ -207,7 +248,7 @@
         [self.view addSubview:label];
         [label mas_makeConstraints:^(MASConstraintMaker *make) {
             make.left.equalTo(self.view).offset(20);
-            make.top.equalTo(self.playNextButton.mas_bottom).offset(20);
+            make.top.equalTo(self.playStatusButton.mas_bottom).offset(20);
         }];
         
         _cacheSlider = [[UISlider alloc]init];
@@ -283,30 +324,39 @@
     self.audioPlayer.url = [NSURL URLWithString:_urlStrings.firstObject];
     self.audioPlayer.delegate = self;
 }
+- (void)useVolume {
+    NSLog(@"menglc useVolume0 %@", @(self.audioPlayer.volume));
+//    self.audioPlayer.volume = 20;
+    NSLog(@"menglc useVolume1 %@", @(self.audioPlayer.volume));
+}
 #pragma mark -LCAudioPlayerDelegate
+- (void)audioPlayerLoading:(LCAudioPlayer *)audioPlayer {
+    
+}
 - (void)audioPlayerDidStart:(LCAudioPlayer *)audioPlayer {
     NSLog(@"menglc audioPlayerDidStart");
-}
-- (void)audioPlayerLoadedMetadata:(LCAudioPlayer *)audioPlayer {
-    NSLog(@"menglc audioPlayerLoadedMetadata");
 }
 - (void)audioPlayerCanPlay:(LCAudioPlayer *)audioPlayer {
     NSLog(@"menglc audioPlayerCanPlay");
 }
-- (void)audioPlayerSeeking:(LCAudioPlayer *)audioPlayer {
-    NSLog(@"menglc audioPlayerSeeking");
-}
-- (void)audioPlayerSeeked:(LCAudioPlayer *)audioPlayer finished:(BOOL)finished {
-    NSLog(@"menglc audioPlayerSeeked");
-}
 - (void)audioPlayerDidPaused:(LCAudioPlayer *)audioPlayer {
     NSLog(@"menglc audioPlayerDidPaused");
+    self.playStatusButton.playState = PlayStatusButtonStatePaused;
 }
 - (void)audioPlayerDidStopped:(LCAudioPlayer *)audioPlayer {
     NSLog(@"menglc audioPlayerDidStopped");
 }
 - (void)audioPlayerDidEnd:(LCAudioPlayer *)audioPlayer {
     NSLog(@"menglc audioPlayerDidEnd");
+}
+- (void)audioPlayer:(LCAudioPlayer *)audioPlayer playError:(NSError *)error {
+    NSLog(@"menglc playError %@", error);
+}
+- (void)audioPlayer:(LCAudioPlayer *)audioPlayer seekingWithSeekTime:(double)seekTime {
+    NSLog(@"menglc seekingWithSeekTime %@", @(seekTime));
+}
+- (void)audioPlayer:(LCAudioPlayer *)audioPlayer seekedWithSeekTime:(double)seekTime finished:(BOOL)finished {
+    NSLog(@"menglc seekedWithSeekTime %@", @(seekTime));
 }
 - (void)audioPlayer:(LCAudioPlayer *)audioPlayer updateCacheTime:(double)cacheTime {
     NSLog(@"menglc updateCacheTime %@", @(cacheTime));
