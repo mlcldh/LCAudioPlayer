@@ -9,9 +9,9 @@
 #import <UIKit/UIKit.h>
 
 typedef NS_ENUM(NSInteger, PlayStatusButtonState) {
-    PlayStatusButtonStateLoading = 0,//
-    PlayStatusButtonStatePlaying = 1,//
-    PlayStatusButtonStatePaused = 2,//
+    PlayStatusButtonStatePaused = 0,//
+    PlayStatusButtonStateLoading = 1,//
+    PlayStatusButtonStatePlaying = 2,//
 };
 
 /***/

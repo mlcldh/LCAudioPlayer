@@ -224,7 +224,6 @@
                 }
                     break;
                 case PlayStatusButtonStatePaused: {
-                    self.playStatusButton.playState = PlayStatusButtonStatePlaying;
                     [self.audioPlayer play];
                 }
                     break;
@@ -331,7 +330,7 @@
 }
 #pragma mark -LCAudioPlayerDelegate
 - (void)audioPlayerLoading:(LCAudioPlayer *)audioPlayer {
-    
+    self.playStatusButton.playState = PlayStatusButtonStateLoading;
 }
 - (void)audioPlayerDidStart:(LCAudioPlayer *)audioPlayer {
     NSLog(@"menglc audioPlayerDidStart");
@@ -367,6 +366,9 @@
 - (void)audioPlayer:(LCAudioPlayer *)audioPlayer updateCurrentTime:(double)currentTime duration:(double)duration {
     NSLog(@"menglc updateCurrentTime %@,%@", @(currentTime), @(duration));
     self.progressSlider.value = currentTime / duration;
+    if (audioPlayer.state == LCAudioPlayerStatePlaying) {
+        self.playStatusButton.playState = PlayStatusButtonStatePlaying;
+    }
 }
 
 @end

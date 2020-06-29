@@ -11,6 +11,8 @@
 
 @interface AppDelegate ()
 
+@property (nonatomic) UIBackgroundTaskIdentifier backgroundTaskIdentifier;
+
 @end
 
 @implementation AppDelegate
@@ -28,6 +30,17 @@
     
     [self.window makeKeyAndVisible];
     return YES;
+}
+- (void)applicationDidEnterBackground:(UIApplication *)application {
+    __weak typeof (self) weakSelf = self;
+    self.backgroundTaskIdentifier = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
+//        NSLog(@"menglc beginBackgroundTaskWithExpirationHandler %@", @(weakSelf.backgroundTaskIdentifier));
+        [[UIApplication sharedApplication] endBackgroundTask:weakSelf.backgroundTaskIdentifier];
+        self.backgroundTaskIdentifier = UIBackgroundTaskInvalid;
+    }];
+}
+- (void)applicationWillEnterForeground:(UIApplication *)application {
+    [[UIApplication sharedApplication] endBackgroundTask:self.backgroundTaskIdentifier];
 }
 
 @end

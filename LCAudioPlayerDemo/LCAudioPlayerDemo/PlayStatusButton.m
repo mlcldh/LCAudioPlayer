@@ -8,6 +8,10 @@
 
 #import "PlayStatusButton.h"
 
+@interface PlayStatusButton ()
+
+@end
+
 @implementation PlayStatusButton
 
 - (instancetype)initWithFrame:(CGRect)frame {
@@ -19,7 +23,7 @@
 }
 - (void)setPlayState:(PlayStatusButtonState)playState {
     _playState = playState;
-    NSArray *imageNames = @[@"lcPlayerLoading", @"lcPlayerPlaying", @"lcPlayerPaused"];
+    NSArray *imageNames = @[@"lcPlayerPaused", @"lcPlayerLoading", @"lcPlayerPlaying"];
     [self setImage:[UIImage imageNamed:imageNames[playState]] forState:(UIControlStateNormal)];
 }
 
